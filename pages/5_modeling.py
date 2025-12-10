@@ -87,8 +87,7 @@ different strategies for addressing class imbalance:
 1. **Baseline Logistic Regression:** Trained on raw features, using feature scaling and class weighting 
    to compensate for severe imbalance
 
-2. **Logistic Regression with Feature Engineering:** Uses the full set of engineered features with 
-   standardization through a `ColumnTransformer`
+2. **Logistic Regression with Feature Engineering:** Uses the full set of engineered features
 
 3. **Random Forest Classifier:** Captures nonlinear relationships and interactions among engineered 
    variables with class weighting
@@ -140,12 +139,41 @@ results_data = {
     ],
     "ROC-AUC": [0.8486, 0.8810, 0.9157, 0.9353, 0.9382],
     "PR-AUC": [0.0213, 0.0232, 0.3682, 0.3639, 0.2764],
-    "Precision": ["-", "-", "-", 0.4231, 0.1057],
-    "Recall": ["-", "-", "-", 0.4889, 0.8222]
+    "Accuracy": [0.8266, 0.8267, 0.9979, 0.9974, 0.9840],
+    "Precision_0": [0.9993, 0.9994, 0.9979, 0.9988, 0.9996],
+    "Recall_0": [0.8268, 0.8268, 0.9999, 0.9985, 0.9843],
+    "F1_0": [0.9048, 0.9049, 0.9989, 0.9987, 0.9919],
+    "Precision_1": [0.0097, 0.0100, 0.6667, 0.4231, 0.1057],
+    "Recall_1": [0.7556, 0.7778, 0.0889, 0.4889, 0.8222],
+    "F1_1": [0.0192, 0.0198, 0.1569, 0.4536, 0.1873]
 }
 
 import pandas as pd
-st.dataframe(pd.DataFrame(results_data), use_container_width=True)
+results_df = pd.DataFrame(results_data)
+
+# Format the dataframe for better display
+st.dataframe(
+    results_df.style.format({
+        "ROC-AUC": "{:.4f}",
+        "PR-AUC": "{:.4f}",
+        "Accuracy": "{:.4f}",
+        "Precision_0": "{:.4f}",
+        "Recall_0": "{:.4f}",
+        "F1_0": "{:.4f}",
+        "Precision_1": "{:.4f}",
+        "Recall_1": "{:.4f}",
+        "F1_1": "{:.4f}"
+    }),
+    use_container_width=True
+)
+
+st.caption("""
+**Metric Definitions:**
+- **Class 0**: Legitimate clicks (negative class)
+- **Class 1**: Fraudulent clicks (positive class)
+- **ROC-AUC**: Area under ROC curve
+- **PR-AUC**: Area under Precision-Recall curve (most important for imbalanced data)
+""")
 
 st.markdown("---")
 
@@ -163,7 +191,7 @@ st.markdown("""
 - Tree-based methods show substantial gains
 - Random Forest achieves ROC-AUC of 0.9157 and PR-AUC of 0.3682
 - **XGBoost obtains the strongest overall performance** with ROC-AUC of 0.9353 and PR-AUC of 0.3639
-- XGBoost achieves balanced threshold-level precision (0.4231) and recall (0.4889), indicating effective 
+- XGBoost achieves balanced level precision (0.4231) and recall (0.4889), indicating effective 
   ranking and moderately effective detection
 
 **Undersampling Approach:**
@@ -175,22 +203,51 @@ st.markdown("""
 
 st.markdown("---")
 
-# PR Curves
-st.markdown("### Precision-Recall Curves")
-st.markdown("""
-The Precision-Recall (PR) curve is particularly important for imbalanced datasets as it focuses on the 
-performance of the positive (minority) class. Unlike ROC-AUC, PR-AUC is more informative when the 
-positive class is rare.
-""")
+# ROC and PR Curves
+st.markdown("### ROC and Precision-Recall Curves")
 
-# Placeholder for PR curve image
-st.image('image/image_1.png', caption='Precision-Recall Curves for All Models', use_container_width=True)
+# Original Features Section
+st.markdown("#### Original Features")
+col1, col2 = st.columns(2)
 
-st.info("""
-**Key Observation:** The PR curves clearly show that tree-based models (Random Forest and XGBoost) 
-significantly outperform linear models. XGBoost with imbalance weighting provides the best balance 
-between precision and recall across different thresholds.
-""")
+with col1:
+    st.image('image/logreg_raw_roc.png', caption='Logistic Regression (Raw) - ROC Curve', use_container_width=True)
+
+with col2:
+    st.image('image/logreg_raw_pr.png', caption='Logistic Regression (Raw) - PR Curve', use_container_width=True)
+
+st.markdown("---")
+
+# Feature Engineered Models Section
+st.markdown("#### Feature Engineered Models")
+
+# Row 1: LogReg FE
+col1, col2 = st.columns(2)
+with col1:
+    st.image('image/logreg_fe_roc.png', caption='Logistic Regression (FE) - ROC Curve', use_container_width=True)
+with col2:
+    st.image('image/logreg_fe_pr.png', caption='Logistic Regression (FE) - PR Curve', use_container_width=True)
+
+# Row 2: Random Forest
+col1, col2 = st.columns(2)
+with col1:
+    st.image('image/rf_fe_roc.png', caption='Random Forest (FE) - ROC Curve', use_container_width=True)
+with col2:
+    st.image('image/rf_fe_pr.png', caption='Random Forest (FE) - PR Curve', use_container_width=True)
+
+# Row 3: XGBoost
+col1, col2 = st.columns(2)
+with col1:
+    st.image('image/xgb_fe_roc.png', caption='XGBoost (FE) - ROC Curve', use_container_width=True)
+with col2:
+    st.image('image/xgb_fe_pr.png', caption='XGBoost (FE) - PR Curve', use_container_width=True)
+
+# Row 4: XGBoost Undersampled
+col1, col2 = st.columns(2)
+with col1:
+    st.image('image/xgb_undersample_roc.png', caption='XGBoost (Undersampled) - ROC Curve', use_container_width=True)
+with col2:
+    st.image('image/xgb_undersample_pr.png', caption='XGBoost (Undersampled) - PR Curve', use_container_width=True)
 
 st.markdown("---")
 
@@ -202,14 +259,11 @@ This helps understand what patterns the model uses to identify fraudulent clicks
 """)
 
 # Placeholder for feature importance image
-st.image('image/feature_importance.png', caption='Feature Importance from XGBoost Model', use_container_width=True)
+st.image('image/05_featureimp.png', caption='Feature Importance from XGBoost Model', use_container_width=True)
 
 st.markdown("""
-**Key Findings:**
-- `app`, `ip_app_count`, `ip_count`, and `ip_app_os_count` are the strongest predictors
-- `channel`, `device`, and time-related features such as `next_click` and `weekday` provide additional signal
-- Behavioral repetition patterns (count-based features) dominate fraud signal detection
-- Temporal features capture automated clicking patterns
+Feature importance analysis shows that `app`, `ip_app_count`, `ip_count`, and `ip_app_os_count` 
+are the strongest predictors, confirming that behavioral repetition patterns dominate fraud signal detection.
 """)
 
 st.markdown("---")
